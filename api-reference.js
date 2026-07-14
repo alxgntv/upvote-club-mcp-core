@@ -13,20 +13,23 @@ import {
 
 export const API_REFERENCE = {
   baseUrl: "https://api.upvote.club/api/public-api/",
+  setup: {
+    steps: [
+      "1. Register at https://upvote.club",
+      "2. Upgrade to the MATE plan (API access is included)",
+      "3. Open https://upvote.club/api and generate your API key (starts with upv_)",
+      "4. Paste the key into your MCP connector as UPVOTE_API_KEY — shown once, save it securely",
+    ],
+    apiKeyUrl: "https://upvote.club/api",
+    signupUrl: "https://upvote.club",
+    header: "X-API-Key",
+    envVar: "UPVOTE_API_KEY",
+    format: "upv_<token>",
+  },
   authentication: {
-    apiKey: {
-      header: "X-API-Key",
-      queryParam: "api_key",
-      format: "upv_<token>",
-      usedBy: ["create_task", "get_task_status", "delete_task"],
-      generateAt: "https://upvote.club/api",
-      requiresPlan: "MATE",
-    },
-    jwt: {
-      header: "Authorization: Bearer <firebase_access_token>",
-      envVar: "UPVOTE_JWT",
-      usedBy: ["list_api_keys", "generate_api_key"],
-    },
+    description: "One API key from https://upvote.club/api. No separate login flow in MCP.",
+    header: "X-API-Key",
+    envVar: "UPVOTE_API_KEY",
   },
   billing: {
     currency: "Upvote.club points",
@@ -69,50 +72,6 @@ export const API_REFERENCE = {
     get_api_reference: {
       description: "Returns this full reference document (examples, errors, pricing). No auth required.",
       input: {},
-    },
-    list_api_keys: {
-      description: "List active API key metadata (hash preview only, not the secret).",
-      auth: "JWT",
-      http: "GET /api/public-api/list-keys/",
-      input: {},
-      successExample: {
-        success: true,
-        keys: [
-          {
-            id: 1,
-            name: "",
-            key_preview: "a1b2c3d4...ef12",
-            is_active: true,
-            is_expired: false,
-            created_at: "2024-12-25T10:30:00Z",
-            last_used_at: "2024-12-26T08:00:00Z",
-            expires_at: null,
-          },
-        ],
-        count: 1,
-      },
-      errors: [
-        { status: 401, error: "Authentication required. Please provide a valid JWT token in Authorization header." },
-      ],
-    },
-    generate_api_key: {
-      description: "Generate new API key. Shown once. Deactivates previous active key.",
-      auth: "JWT + MATE plan",
-      http: "POST /api/public-api/generate-key/",
-      input: { name: "optional string label" },
-      successExample: {
-        success: true,
-        api_key: "upv_xxxxxxxx",
-        key_id: 1,
-        name: "",
-        created_at: "2024-12-25T10:30:00Z",
-        message: "API key generated successfully. Save this key securely - it will not be shown again.",
-        previous_key_deactivated: true,
-      },
-      errors: [
-        { status: 401, error: "Authentication required. Please provide a valid JWT token." },
-        { status: 403, error: "API access requires MATE plan. Please upgrade your account." },
-      ],
     },
     create_task: {
       description: "Create promotion task. Spends points and 1 daily slot immediately.",
@@ -315,6 +274,7 @@ export const API_REFERENCE = {
     },
   },
   workflowForClaude: [
+    "0. If user has no API key: send them to https://upvote.club → MATE plan → https://upvote.club/api to generate key.",
     "1. Call get_api_reference or list_platforms before first create_task in a session.",
     "2. Detect social_network_code from URL or ask user.",
     "3. Pick action type allowed on that platform; check min price (16 for GitHub/Product Hunt, 64 for meaningful COMMENT).",

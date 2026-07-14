@@ -21,51 +21,34 @@ import { API_REFERENCE, getApiReferenceText } from "./api-reference.js";
 const DEFAULT_API_URL = "https://api.upvote.club";
 
 /**
- * @param {{ apiKey?: string, jwtToken?: string, apiUrl?: string, logPrefix?: string }} config
+ * @param {{ apiKey?: string, apiUrl?: string, logPrefix?: string }} config
  * @param {{ skipTools?: string[] }} options
  */
 export function registerUpvoteClubTools(server, config = {}, options = {}) {
   const skipTools = new Set(options.skipTools || []);
   const apiUrl = (config.apiUrl || process.env.UPVOTE_API_URL || DEFAULT_API_URL).replace(/\/+$/, "");
   const apiKey = config.apiKey ?? process.env.UPVOTE_API_KEY ?? "";
-  const jwtToken = config.jwtToken ?? process.env.UPVOTE_JWT ?? "";
   const logPrefix = config.logPrefix || "[upvote-mcp]";
 
-  async function apiRequest(method, path, body = null, authMode = "api_key") {
+  async function apiRequest(method, path, body = null) {
     const headers = { "Content-Type": "application/json" };
 
-    if (authMode === "api_key") {
-      if (!apiKey) {
-        console.error(`${logPrefix} apiRequest aborted: UPVOTE_API_KEY is not configured`);
-        return {
-          ok: false,
-          status: 0,
-          data: {
-            success: false,
-            error:
-              "API key is not configured. Set UPVOTE_API_KEY (generate at https://upvote.club/api — requires MATE plan).",
-          },
-        };
-      }
-      headers["X-API-Key"] = apiKey;
-    } else if (authMode === "jwt") {
-      if (!jwtToken) {
-        console.error(`${logPrefix} apiRequest aborted: UPVOTE_JWT is not configured`);
-        return {
-          ok: false,
-          status: 0,
-          data: {
-            success: false,
-            error:
-              "JWT token is not configured. Set UPVOTE_JWT (Firebase access token from an authenticated Upvote.club session). Required for list_api_keys and generate_api_key.",
-          },
-        };
-      }
-      headers["Authorization"] = `Bearer ${jwtToken}`;
+    if (!apiKey) {
+      console.error(`${logPrefix} apiRequest aborted: UPVOTE_API_KEY is not configured`);
+      return {
+        ok: false,
+        status: 0,
+        data: {
+          success: false,
+          error:
+            "API key is not configured. Sign up at https://upvote.club, upgrade to MATE, generate your key at https://upvote.club/api and set UPVOTE_API_KEY.",
+        },
+      };
     }
+    headers["X-API-Key"] = apiKey;
 
     const url = `${apiUrl}${path}`;
-    console.error(`${logPrefix} API request: ${method} ${url} auth=${authMode} body=${body ? JSON.stringify(body) : "none"}`);
+    console.error(`${logPrefix} API request: ${method} ${url} body=${body ? JSON.stringify(body) : "none"}`);
 
     let response;
     try {
@@ -161,62 +144,6 @@ export function registerUpvoteClubTools(server, config = {}, options = {}) {
     async () => {
       console.error(`${logPrefix} Tool call: get_api_reference`);
       return toolResult({ success: true, reference: API_REFERENCE });
-    }
-  );
-
-  server.registerTool(
-    "list_api_keys",
-    {
-      title: "List API Keys",
-      description:
-        "List the active Upvote.club API key metadata for the authenticated account (preview hash, created_at, last_used_at). Requires UPVOTE_JWT (session token), not the API key itself.",
-      inputSchema: {},
-      annotations: {
-        readOnlyHint: true,
-        openWorldHint: false,
-      },
-    },
-    async () => {
-      console.error(`${logPrefix} Tool call: list_api_keys`);
-      const { ok, status, data } = await apiRequest("GET", "/api/public-api/list-keys/", null, "jwt");
-      if (!ok) {
-        return toolResult({ success: false, http_status: status, ...data }, true);
-      }
-      return toolResult(data);
-    }
-  );
-
-  server.registerTool(
-    "generate_api_key",
-    {
-      title: "Generate API Key",
-      description:
-        "Generate a new Upvote.club API key for the authenticated account. The full key is returned only once — save it securely. Deactivates any previous active key. Requires UPVOTE_JWT (session token) and MATE plan.",
-      inputSchema: {
-        name: z.string().optional().describe("Optional label for the API key"),
-      },
-      annotations: {
-        readOnlyHint: false,
-        destructiveHint: false,
-        idempotentHint: false,
-        openWorldHint: false,
-      },
-    },
-    async (args) => {
-      console.error(`${logPrefix} Tool call: generate_api_key args=${JSON.stringify(args)}`);
-      const { ok, status, data } = await apiRequest(
-        "POST",
-        "/api/public-api/generate-key/",
-        args.name ? { name: args.name } : {},
-        "jwt"
-      );
-      if (!ok) {
-        return toolResult({ success: false, http_status: status, ...data }, true);
-      }
-      return toolResult({
-        ...data,
-        hint: "Store the api_key value securely. Configure it as UPVOTE_API_KEY for create_task, get_task_status, and delete_task.",
-      });
     }
   );
 

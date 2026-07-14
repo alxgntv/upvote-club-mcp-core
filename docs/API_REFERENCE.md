@@ -1,16 +1,23 @@
 # Upvote.club Public API — MCP Reference
 
-Full reference for all MCP tools. Machine-readable copy: call **`get_api_reference`** tool or read [`api-reference.js`](api-reference.js).
+## Setup (единственный шаг для пользователя)
+
+1. Зарегистрируйся на **https://upvote.club**
+2. Оформи план **MATE** (без него API недоступен)
+3. Открой **https://upvote.club/api** → сгенерируй API key (`upv_...`)
+4. Вставь ключ в настройки MCP-коннектора как `UPVOTE_API_KEY`
+
+Ключ показывается один раз — сохрани его. Перегенерировать можно только снова на https://upvote.club/api
+
+MCP **не** выдаёт и **не** генерирует ключи — только использует уже полученный.
 
 ## Auth
 
-| Tool | Auth |
-|------|------|
-| `list_platforms`, `get_api_reference` | none |
-| `list_api_keys`, `generate_api_key` | JWT (`UPVOTE_JWT`) |
-| `create_task`, `get_task_status`, `delete_task` | API key (`UPVOTE_API_KEY`, header `X-API-Key`) |
-
-**MATE plan** required for API access.
+| Что | Значение |
+|-----|----------|
+| Header | `X-API-Key: upv_...` |
+| Env var | `UPVOTE_API_KEY` |
+| Получить ключ | https://upvote.club/api |
 
 ## Pricing
 
@@ -22,8 +29,6 @@ Full reference for all MCP tools. Machine-readable copy: call **`get_api_referen
 | Charge | `price × actions_required` (plan discount on create) |
 | Daily slot | 1 slot per `create_task` |
 | Refund | `delete_task` refunds incomplete actions |
-
-See `minPricesByAction` in `list_platforms` output.
 
 ## create_task — examples
 
@@ -91,41 +96,22 @@ See `minPricesByAction` in `list_platforms` output.
 |------|-------|
 | 401 | Invalid or missing API key |
 | 403 | MATE plan required |
-| 403 | Profile verification required (`needs_verification: true`) |
+| 403 | Profile verification required |
 | 400 | Missing required fields |
 | 400 | Minimum price per action is 2 points |
 | 400 | No available tasks left |
-| 400 | Insufficient balance (`required_balance`, `current_balance`) |
-| 400 | Duplicate URL+type+platform (`existing_task_id`) |
-| 400 | meaningful_comments required / no links in comments |
-| 400 | Invalid multi_action_items |
+| 400 | Insufficient balance |
+| 400 | Duplicate URL+type+platform |
+| 400 | meaningful_comments required / no links |
 
-## get_task_status
+## Tools (6)
 
-```json
-{ "task_ids": [12345, 12346] }
-```
+| Tool | Auth | Purpose |
+|------|------|---------|
+| `get_api_reference` | none | Full docs (JSON) |
+| `list_platforms` | none | Platforms + min prices |
+| `create_task` | API key | Create promotion |
+| `get_task_status` | API key | Track progress |
+| `delete_task` | API key | Cancel + refund |
 
-Returns `progress_percentage`, `action_completions` (meaningful comments), `multi_action_items` for bundles.
-
-## delete_task
-
-```json
-{ "task_id": 12345 }
-```
-
-Completed tasks cannot be deleted (400).
-
-## Tools (8)
-
-| Tool | Purpose |
-|------|---------|
-| `get_api_reference` | Full docs (this content + JSON) |
-| `list_platforms` | Platforms, actions, min prices |
-| `list_api_keys` | Key metadata |
-| `generate_api_key` | New key (once) |
-| `create_task` | Create promotion |
-| `get_task_status` | Track progress |
-| `delete_task` | Cancel + refund |
-
-Source of truth: `front-upvote-club/src/data/apiDocumentation.json` + `back-upvote-club/api/public_api_views.py`
+Machine-readable: call `get_api_reference` or read `api-reference.js`.
