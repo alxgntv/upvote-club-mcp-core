@@ -1,23 +1,23 @@
 # Upvote.club Public API — MCP Reference
 
-## Setup (единственный шаг для пользователя)
+## Setup
 
-1. Зарегистрируйся на **https://upvote.club**
-2. Оформи план **MATE** (без него API недоступен)
-3. Открой **https://upvote.club/api** → сгенерируй API key (`upv_...`)
-4. Вставь ключ в настройки MCP-коннектора как `UPVOTE_API_KEY`
+1. Register at **https://upvote.club**
+2. Subscribe to the **MATE** plan (API access requires MATE)
+3. Open **https://upvote.club/api** and generate your API key (`upv_...`)
+4. Paste the key into your MCP connector settings as `UPVOTE_API_KEY`
 
-Ключ показывается один раз — сохрани его. Перегенерировать можно только снова на https://upvote.club/api
+The key is shown only once — save it securely. To rotate, generate a new key at https://upvote.club/api
 
-MCP **не** выдаёт и **не** генерирует ключи — только использует уже полученный.
+MCP does **not** issue or generate keys — it only uses a key you already created in the dashboard.
 
 ## Auth
 
-| Что | Значение |
-|-----|----------|
+| Field | Value |
+|-------|-------|
 | Header | `X-API-Key: upv_...` |
 | Env var | `UPVOTE_API_KEY` |
-| Получить ключ | https://upvote.club/api |
+| Get your key | https://upvote.club/api |
 
 ## Pricing
 
