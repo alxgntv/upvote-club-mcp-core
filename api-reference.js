@@ -178,13 +178,6 @@ export const API_REFERENCE = {
       errors: [
         { status: 401, error: "Invalid or missing API key. Provide X-API-Key header or api_key parameter." },
         { status: 403, error: "API access requires MATE plan. Please upgrade your account." },
-        {
-          status: 403,
-          error: "Profile verification required. Please verify your social profile before creating tasks.",
-          needs_verification: true,
-          social_network_code: "REDDIT",
-          note: "FREE non-tier1 users with free task slots must verify social profile on the target network",
-        },
         { status: 400, error: "Missing required fields: post_url, type, price, actions_required, social_network_code" },
         { status: 400, error: "Minimum price per action is 2 points" },
         { status: 400, error: "No available tasks left. Please purchase more tasks." },

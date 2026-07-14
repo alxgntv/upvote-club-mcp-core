@@ -96,7 +96,6 @@ MCP **не** выдаёт и **не** генерирует ключи — тол
 |------|-------|
 | 401 | Invalid or missing API key |
 | 403 | MATE plan required |
-| 403 | Profile verification required |
 | 400 | Missing required fields |
 | 400 | Minimum price per action is 2 points |
 | 400 | No available tasks left |
